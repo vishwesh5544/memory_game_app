@@ -12,49 +12,57 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vishwesh.memorygame.viewmodel.GameViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun GameScreen() {
     val gameViewModel: GameViewModel = viewModel()
 
-    val score by gameViewModel.score
-    val gameEnded by gameViewModel.gameEnded
-    val showTiles by gameViewModel.showTiles
-    val canSubmit by gameViewModel.canSubmit
-    val userSelections = gameViewModel.userSelections
-    val timerValue by gameViewModel.timerValue.collectAsState()
+    // Observing state variables from GameViewModel
+    val score by gameViewModel.score // Current score
+    val gameEnded by gameViewModel.gameEnded // Flag indicating if the game has ended
+    val showTiles by gameViewModel.showTiles // Flag to show or hide tiles
+    val canSubmit by gameViewModel.canSubmit // Flag to allow submission of answers
+    val userSelections = gameViewModel.userSelections // List of user-selected tiles
+    val timerValue by gameViewModel.timerValue.collectAsState() // Timer value for UI
+    val showSubmitButton by gameViewModel.showSubmitButton // Flag to show or hide the submit button
 
-    if (gameEnded) {
+    Surface(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Game Over! Your score was $score", color = Color.Red)
-            Button(onClick = { gameViewModel.startGame() }) {
-                Text("Restart Game")
+            // Display current score
+            Text("Score: $score")
+
+            // Start button when game hasn't started or ended
+            if (!showTiles && !canSubmit && !gameEnded) {
+                StartButton(onClick = { gameViewModel.startGame() })
             }
-        }
-    } else {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text("Score: $score")
-                if (!showTiles) {
-                    Text("Memorize tiles for 3 seconds")
-                    Timer(timerValue)
-                } else if (canSubmit) {
-                    Text("Submit your answers within 5 seconds")
-                    Timer(timerValue)
-                    Button(onClick = { gameViewModel.submitAnswers() }) {
-                        Text("Submit Answers")
-                    }
-                }
+
+            // Display instructions during memorization phase or answer phase
+            if (showTiles || canSubmit) {
+                Text("Memorize tiles for 3 seconds")
+                Timer(timerValue)
+            }
+
+            // Display submit button during answer phase
+            if (showSubmitButton && !gameEnded) {
+                SubmitButton(onClick = { gameViewModel.submitAnswers() })
+            }
+
+            // Display submit button again during answer phase if needed
+            if (canSubmit) {
+                SubmitButton(onClick = { gameViewModel.submitAnswers() })
+            }
+
+            // Display game over screen when game has ended
+            if (gameEnded) {
+                GameOver(score = score, onClick = { gameViewModel.startGame() })
+            }
+
+            // Display grid of tiles during game rounds
+            if (!gameEnded) {
                 Grid(
                     gridSize = 6,
                     highlightedTiles = gameViewModel.highlightedTiles,
@@ -65,6 +73,26 @@ fun GameScreen() {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun StartButton(onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier.padding(vertical = 16.dp)
+    ) {
+        Text("Start Game")
+    }
+}
+
+@Composable
+fun SubmitButton(onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier.padding(vertical = 16.dp)
+    ) {
+        Text("Submit Answers")
     }
 }
 
@@ -82,6 +110,20 @@ fun Timer(timerValue: Int) {
             modifier = Modifier.align(Alignment.Center),
             color = Color.White
         )
+    }
+}
+
+@Composable
+fun GameOver(score: Int, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Game Over! Your score was $score", color = Color.Red)
+        Button(onClick = onClick) {
+            Text("Restart Game")
+        }
     }
 }
 
@@ -104,15 +146,23 @@ fun Grid(
                     else -> Color.Gray
                 }
 
+                val clickable = (!showTiles && !canSubmit) || (canSubmit && !highlightedTiles[index])
                 Box(
                     modifier = Modifier
                         .size(48.dp)
                         .background(tileColor)
                         .border(1.dp, Color.Black)
-                        .clickable(enabled = !showTiles && !canSubmit) { onClick(index) }
+                        .clickable(
+                            enabled = clickable
+                        ) {
+                            if (!showTiles || canSubmit) {
+                                onClick(index)
+                            }
+                        }
                         .padding(4.dp)
                 )
             }
         }
     }
 }
+
