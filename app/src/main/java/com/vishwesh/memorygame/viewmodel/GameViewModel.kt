@@ -29,6 +29,7 @@ class GameViewModel : ViewModel() {
 
     // Lists to track highlighted tiles and user selections
     var highlightedTiles = mutableStateListOf<Boolean>()
+    var correctAnswers = mutableStateListOf<Boolean>()
     var userSelections = mutableStateListOf<Boolean>()
 
     init {
@@ -55,7 +56,6 @@ class GameViewModel : ViewModel() {
 
     fun toggleTileSelection(index: Int) {
         print("*** tile index: $index\n")
-        highlightedTiles[index] = !highlightedTiles[index]
         userSelections[index] = !userSelections[index]
     }
 
@@ -77,6 +77,7 @@ class GameViewModel : ViewModel() {
                 delay(1000) // Delay for 1 second
             }
 
+            correctAnswers = highlightedTiles
             highlightedTiles.clear();
             highlightedTiles.addAll(List(gridSize * gridSize) { false })
             canSubmit.value = true // Allow submission after display time
@@ -99,7 +100,7 @@ class GameViewModel : ViewModel() {
     fun submitAnswers() {
         canSubmit.value = true // Allow submission
         // Count the number of correct selections
-        val correctCount = userSelections.indices.count { userSelections[it] && highlightedTiles[it] }
+        val correctCount = userSelections.indices.count { userSelections[it] && correctAnswers[it] }
 
         if (correctCount == numberOfTilesToHighlight) {
             // If all correct, update score and prepare for the next round
