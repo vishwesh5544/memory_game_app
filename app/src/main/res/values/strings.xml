@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Memory Game App</string>
+    <string name="welcome">Welcome</string>
+    <string name="game">Game</string>
+    <string name="high_scores">High Scores</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+</resources>
