@@ -32,6 +32,8 @@ class GameViewModel : ViewModel() {
     var correctAnswers = mutableStateListOf<Boolean>()
     var userSelections = mutableStateListOf<Boolean>()
 
+    var userName = mutableStateOf("")
+
     init {
         initializeGame() // Initialize the game state
     }
@@ -42,6 +44,7 @@ class GameViewModel : ViewModel() {
         highlightedTiles.addAll(List(gridSize * gridSize) { false })
         userSelections.clear()
         userSelections.addAll(List(gridSize * gridSize) { false })
+        correctAnswers.clear()
         gameEnded.value = false
         showTiles.value = false
         canSubmit.value = false
@@ -77,7 +80,10 @@ class GameViewModel : ViewModel() {
                 delay(1000) // Delay for 1 second
             }
 
-            correctAnswers = highlightedTiles
+            correctAnswers.addAll(highlightedTiles)
+            for (i in 0 until gridSize * gridSize) {
+                print("*** tile index: $i, correctAnswers: ${correctAnswers[i]}\n")
+            }
             highlightedTiles.clear();
             highlightedTiles.addAll(List(gridSize * gridSize) { false })
             canSubmit.value = true // Allow submission after display time
@@ -96,11 +102,19 @@ class GameViewModel : ViewModel() {
         }
     }
 
+    private fun gameEnd() {
+        gameEnded.value = true
+        timerValue.value = 0
+
+        // save to json
+    }
+
 
     fun submitAnswers() {
         canSubmit.value = true // Allow submission
         // Count the number of correct selections
         val correctCount = userSelections.indices.count { userSelections[it] && correctAnswers[it] }
+
 
         if (correctCount == numberOfTilesToHighlight) {
             // If all correct, update score and prepare for the next round
@@ -109,11 +123,7 @@ class GameViewModel : ViewModel() {
             round++
             if (round <= maxRounds) {
                 prepareGameRound()
-            } else {
-                gameEnded.value = true // Game ends if maximum rounds reached
-            }
-        } else {
-            gameEnded.value = true // Game ends if incorrect selection or time up
-        }
+            } else gameEnd()
+        } else gameEnd()
     }
 }

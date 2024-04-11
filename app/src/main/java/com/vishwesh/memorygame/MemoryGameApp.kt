@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.vishwesh.memorygame
 
 import androidx.compose.animation.*
@@ -10,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,11 +19,13 @@ import androidx.navigation.compose.rememberNavController
 import com.vishwesh.memorygame.ui.game.GameScreen
 import com.vishwesh.memorygame.ui.highscores.HighScoresScreen
 import com.vishwesh.memorygame.ui.welcome.WelcomeScreen
+import com.vishwesh.memorygame.viewmodel.GameViewModel
 
 
 @Composable
 fun MemoryGameApp() {
     val navController = rememberNavController()
+    val viewModel: GameViewModel = viewModel()
 
     Scaffold(
         topBar = {
@@ -33,9 +37,9 @@ fun MemoryGameApp() {
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             NavHost(navController = navController, startDestination = "welcome") {
-                composable("welcome") { WelcomeScreen() }
-                composable("game") { GameScreen() }
-                composable("highScores") { HighScoresScreen() }
+                composable("welcome") { WelcomeScreen(navController, viewModel) }
+                composable("game") { GameScreen(viewModel) }
+                composable("highScores") { HighScoresScreen(viewModel) }
             }
         }
     }
