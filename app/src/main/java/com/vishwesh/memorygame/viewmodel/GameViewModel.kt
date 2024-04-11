@@ -1,9 +1,9 @@
 package com.vishwesh.memorygame.viewmodel
 
 import android.content.SharedPreferences
+import android.os.CountDownTimer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableStateListOf
@@ -17,8 +17,8 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
     private val gridSize = 6 // Size of the grid
     private var numberOfTilesToHighlight = 4 // Number of tiles to highlight initially
     private var round = 1 // Current round number
-    private val displayTime = 3 // Time to display highlighted tiles for memorization
-    private val answerTime = 5 // Time to answer after tiles are hidden
+    private val questionTime = 3000L // Time to display highlighted tiles for memorization
+    private val answerTime = 5000L // Time to answer after tiles are hidden
     private val maxRounds = 3 // Maximum number of rounds
 
     // State variables using MutableStateFlow and MutableStateList for Compose UI
@@ -35,6 +35,10 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
     var userSelections = mutableStateListOf<Boolean>()
 
     var username = mutableStateOf("")
+
+    val COUNTDOWN_INTERVAL = 1000L
+    var questionTimer: CountDownTimer? = null
+    var answerTimer: CountDownTimer? = null
 
     init {
         initializeGame() // Initialize the game state
@@ -66,6 +70,7 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
 
 
     private fun prepareGameRound() {
+        timerValue.value = questionTime.toInt() // Reset the timer to full display time at the start of the round
         initializeGame() // Initialize for each round
         showTiles.value = true // Show the tiles for memorization
         canSubmit.value = false // Set submission to false initially
@@ -77,30 +82,37 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
         }
 
         viewModelScope.launch {
-            for (i in displayTime downTo 1) {
-                timerValue.value = i // Update the timer value for UI
-                delay(1000) // Delay for 1 second
+            /// answer timer
+            answerTimer = object : CountDownTimer(answerTime, COUNTDOWN_INTERVAL) {
+                override fun onTick(millisUntilFinished: Long) {
+                    timerValue.value = (millisUntilFinished / 1000).toInt()
+                }
+
+                override fun onFinish() {
+                    canSubmit.value = false // Disallow submission after answer time
+
+                    if (!canSubmit.value) {
+                        submitAnswers() // If submission time is up, submit answers automatically
+                    }
+                }
             }
 
-            correctAnswers.addAll(highlightedTiles)
-            for (i in 0 until gridSize * gridSize) {
-                print("*** tile index: $i, correctAnswers: ${correctAnswers[i]}\n")
-            }
-            highlightedTiles.clear();
-            highlightedTiles.addAll(List(gridSize * gridSize) { false })
-            canSubmit.value = true // Allow submission after display time
+            questionTimer = object : CountDownTimer(questionTime, COUNTDOWN_INTERVAL) {
+                override fun onTick(millisUntilFinished: Long) {
+                    timerValue.value = (millisUntilFinished / 1000).toInt()
+                }
 
-            for (i in answerTime downTo 1) {
-                timerValue.value = i // Update the timer value for UI
-                delay(1000) // Delay for 1 second
-            }
+                override fun onFinish() {
+                    correctAnswers.addAll(highlightedTiles)
+                    highlightedTiles.clear();
+                    highlightedTiles.addAll(List(gridSize * gridSize) { false })
+                    canSubmit.value = true // Allow submission after display time
 
-            canSubmit.value = false // Disallow submission after answer time
-
-            if (!canSubmit.value) {
-                submitAnswers() // If submission time is up, submit answers automatically
+                    answerTimer!!.start()
+                }
             }
 
+            questionTimer!!.start()
         }
     }
 
@@ -109,13 +121,14 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
         timerValue.value = 0
 
         // save to json
-        if(username.value.isNotEmpty()) {
+        if (username.value.isNotEmpty()) {
             saveScore(username.value, score.value)
         }
     }
 
 
     fun submitAnswers() {
+        answerTimer!!.cancel()
         canSubmit.value = true // Allow submission
         // Count the number of correct selections
         val correctCount = userSelections.indices.count { userSelections[it] && correctAnswers[it] }
@@ -124,8 +137,11 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
         if (correctCount == numberOfTilesToHighlight) {
             // If all correct, update score and prepare for the next round
             score.value += round * 10
+
             if (round % maxRounds == 0) numberOfTilesToHighlight++
+
             round++
+
             if (round <= maxRounds) {
                 prepareGameRound()
             } else gameEnd()

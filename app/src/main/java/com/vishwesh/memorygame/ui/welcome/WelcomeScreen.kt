@@ -50,7 +50,7 @@ fun WelcomeScreen(navController: NavController, viewModel: GameViewModel) {
         Button(onClick = {
             navController.navigate("game")
         }) {
-            Text("Start Game")
+            Text("Play Game")
         }
     }
 }

@@ -8,7 +8,7 @@ import com.vishwesh.memorygame.model.ScoreEntry
 
 class HighScoresViewModel(private val preferences: SharedPreferences, private val gson: Gson) : ViewModel() {
     // Define constants and variables
-    private val highScoresKey = "highScores" // Key for storing high scores in SharedPreferences
+    private val highScoresKey = "scores" // Key for storing high scores in SharedPreferences
     private val highScoresType = object : TypeToken<List<ScoreEntry>>() {}.type // Type for Gson serialization
 
     // Function to retrieve high scores from SharedPreferences
