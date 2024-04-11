@@ -138,13 +138,19 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
             // If all correct, update score and prepare for the next round
             score.value += round * 10
 
-            if (round % maxRounds == 0) numberOfTilesToHighlight++
+//            if (round % maxRounds == 0) numberOfTilesToHighlight++
 
             round++
 
-            if (round <= maxRounds) {
-                prepareGameRound()
-            } else gameEnd()
+            if (round > maxRounds && numberOfTilesToHighlight == 4) {
+                // Increase the number of tiles to highlight after the initial rounds
+                numberOfTilesToHighlight = 5
+            }
+
+//            if (round <= maxRounds) {
+//                prepareGameRound()
+//            } else gameEnd()
+            prepareGameRound()
         } else gameEnd()
     }
 
