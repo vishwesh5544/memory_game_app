@@ -9,18 +9,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.vishwesh.memorygame.viewmodel.GameViewModel
 
 @Composable
 fun WelcomeScreen(navController: NavController, viewModel: GameViewModel) {
     var gameEnded = viewModel.gameEnded.value
-    var playerName = viewModel.userName.value
+    var playerName = viewModel.username.value
 
     Column(
         modifier = Modifier
@@ -43,7 +41,7 @@ fun WelcomeScreen(navController: NavController, viewModel: GameViewModel) {
 
         OutlinedTextField(
             value = playerName,
-            onValueChange = { viewModel.userName.value = it },
+            onValueChange = { viewModel.username.value = it },
             label = { Text("Enter your name for high score") }
         )
 

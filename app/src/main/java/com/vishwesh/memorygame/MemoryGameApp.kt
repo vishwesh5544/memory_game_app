@@ -2,6 +2,7 @@
 
 package com.vishwesh.memorygame
 
+import android.content.Context
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -20,12 +21,20 @@ import com.vishwesh.memorygame.ui.game.GameScreen
 import com.vishwesh.memorygame.ui.highscores.HighScoresScreen
 import com.vishwesh.memorygame.ui.welcome.WelcomeScreen
 import com.vishwesh.memorygame.viewmodel.GameViewModel
+import androidx.compose.ui.platform.LocalContext
+import com.google.gson.GsonBuilder
+import com.vishwesh.memorygame.viewmodelFactory.GameViewModelFactory
 
 
 @Composable
 fun MemoryGameApp() {
     val navController = rememberNavController()
-    val viewModel: GameViewModel = viewModel()
+    val context = LocalContext.current
+
+    val prefs = context.getSharedPreferences("game_prefs", Context.MODE_PRIVATE)
+    val gson = GsonBuilder().create()
+    val gameVmFactory = GameViewModelFactory(prefs, gson)
+    val viewModel: GameViewModel = viewModel(factory = gameVmFactory)
 
     Scaffold(
         topBar = {

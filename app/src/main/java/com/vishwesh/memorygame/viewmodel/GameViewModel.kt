@@ -1,16 +1,18 @@
 package com.vishwesh.memorygame.viewmodel
 
+import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.vishwesh.memorygame.model.ScoreEntry
 
-class GameViewModel : ViewModel() {
+class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson) : ViewModel() {
     // Define constants and variables
     private val gridSize = 6 // Size of the grid
     private var numberOfTilesToHighlight = 4 // Number of tiles to highlight initially
@@ -32,7 +34,7 @@ class GameViewModel : ViewModel() {
     var correctAnswers = mutableStateListOf<Boolean>()
     var userSelections = mutableStateListOf<Boolean>()
 
-    var userName = mutableStateOf("")
+    var username = mutableStateOf("")
 
     init {
         initializeGame() // Initialize the game state
@@ -107,6 +109,9 @@ class GameViewModel : ViewModel() {
         timerValue.value = 0
 
         // save to json
+        if(username.value.isNotEmpty()) {
+            saveScore(username.value, score.value)
+        }
     }
 
 
@@ -125,5 +130,17 @@ class GameViewModel : ViewModel() {
                 prepareGameRound()
             } else gameEnd()
         } else gameEnd()
+    }
+
+    private fun saveScore(username: String, score: Int) {
+        val scoresJson = prefs.getString("scores", "[]")
+        val type = object : TypeToken<List<ScoreEntry>>() {}.type
+        val scores = gson.fromJson<List<ScoreEntry>>(scoresJson, type).toMutableList()
+
+        scores.add(ScoreEntry(username, score))
+
+        val editor = prefs.edit()
+        editor.putString("scores", gson.toJson(scores))
+        editor.apply()
     }
 }
