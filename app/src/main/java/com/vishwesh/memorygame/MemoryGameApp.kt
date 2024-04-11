@@ -23,7 +23,9 @@ import com.vishwesh.memorygame.ui.welcome.WelcomeScreen
 import com.vishwesh.memorygame.viewmodel.GameViewModel
 import androidx.compose.ui.platform.LocalContext
 import com.google.gson.GsonBuilder
+import com.vishwesh.memorygame.viewmodel.HighScoresViewModel
 import com.vishwesh.memorygame.viewmodelFactory.GameViewModelFactory
+import com.vishwesh.memorygame.viewmodelFactory.HighScoresViewModelFactory
 
 
 @Composable
@@ -33,8 +35,12 @@ fun MemoryGameApp() {
 
     val prefs = context.getSharedPreferences("game_prefs", Context.MODE_PRIVATE)
     val gson = GsonBuilder().create()
+
     val gameVmFactory = GameViewModelFactory(prefs, gson)
-    val viewModel: GameViewModel = viewModel(factory = gameVmFactory)
+    val gameVm: GameViewModel = viewModel(factory = gameVmFactory)
+
+    val highScoresViewModelFactory = HighScoresViewModelFactory(prefs, gson)
+    val highScoresVm: HighScoresViewModel = viewModel(factory = highScoresViewModelFactory)
 
     Scaffold(
         topBar = {
@@ -46,9 +52,9 @@ fun MemoryGameApp() {
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             NavHost(navController = navController, startDestination = "welcome") {
-                composable("welcome") { WelcomeScreen(navController, viewModel) }
-                composable("game") { GameScreen(viewModel) }
-                composable("highScores") { HighScoresScreen(viewModel) }
+                composable("welcome") { WelcomeScreen(navController, gameVm) }
+                composable("game") { GameScreen(gameVm) }
+                composable("highScores") { HighScoresScreen(highScoresVm) }
             }
         }
     }
