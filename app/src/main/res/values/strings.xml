@@ -1,8 +1,33 @@
 <resources>
     <string name="app_name">Memory Game App</string>
-    <string name="welcome">Welcome</string>
-    <string name="game">Game</string>
-    <string name="high_scores">High Scores</string>
-    <string name="open">Open</string>
-    <string name="close">Close</string>
+
+    <!-- welcome screen strings    -->
+    <string name="welcome_label">Welcome to the Memory Game!</string>
+    <string name="instructions_heading">Instructions:</string>
+    <string name="instruction_1">1. A 6x6 grid will display and highlight 4 tiles for 3 seconds for you to remember.</string>
+    <string name="instruction_2">2. You must then correctly pick the 4 highlighted tiles to continue.</string>
+    <string name="instruction_3">3. You must select the tiles within 5 seconds.</string>
+    <string name="instruction_4">4. If the wrong tile is selected or time is up, the game ends.</string>
+    <string name="instruction_5">5. Each round you select correctly, you receive 10 points.</string>
+    <string name="instruction_6">6. After 3 successful rounds, you will need to pick 5 tiles, and each correct selection gains 20 points.</string>
+    <string name="enter_name">Enter your name for high score</string>
+    <string name="play_game">Play Game</string>
+
+    <!-- high scores screen strings    -->
+    <string name="high_scores_headline">High Scores Screen</string>
+    <string name="no_scores_found">No high scores found</string>
+
+    <!-- game over screen strings    -->
+    <string name="game_over">Game Over! Your score was %1$d</string>
+    <string name="restart_game">Restart Game</string>
+
+    <!-- game screen strings    -->
+    <string name="current_score">Score: %1$d</string>
+    <string name="memorize_instruction">Memorize tiles for 3 seconds</string>
+
+
+    <!-- button strings    -->
+    <string name="start_game">Start Game</string>
+    <string name="submit_answers">Submit Answers</string>
+
 </resources>

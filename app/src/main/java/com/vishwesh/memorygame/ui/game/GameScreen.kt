@@ -5,7 +5,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.vishwesh.memorygame.R
 import com.vishwesh.memorygame.viewmodel.GameViewModel
 
 @Composable
@@ -25,12 +27,15 @@ fun GameScreen(viewModel: GameViewModel) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Score: $score")
+            val scoreLabel = stringResource(id =  R.string.current_score, score)
+            val memorizeLabel = stringResource(id = R.string.memorize_instruction)
+
+            Text(scoreLabel)
             Spacer(modifier = Modifier.height(16.dp))
 
             // Always present to keep layout stable, visibility toggled
             if (showTiles || canSubmit) {
-                Text("Memorize tiles for 3 seconds")
+                Text(memorizeLabel)
                 Timer(timerValue)
             } else {
                 Spacer(modifier = Modifier.size(60.dp)) // Placeholder for Timer

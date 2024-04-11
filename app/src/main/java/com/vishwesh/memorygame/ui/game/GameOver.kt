@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import com.vishwesh.memorygame.R
 
 @Composable
 fun GameOver(score: Int, onClick: () -> Unit) {
@@ -17,9 +19,12 @@ fun GameOver(score: Int, onClick: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Game Over! Your score was $score", color = Color.Red)
+        val scoreLabel = stringResource(id = R.string.game_over, score)
+        val restartGame = stringResource(id = R.string.restart_game)
+
+        Text(scoreLabel, color = Color.Red)
         Button(onClick = onClick) {
-            Text("Restart Game")
+            Text(restartGame)
         }
     }
 }

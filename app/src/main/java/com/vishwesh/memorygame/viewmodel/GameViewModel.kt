@@ -2,6 +2,7 @@ package com.vishwesh.memorygame.viewmodel
 
 import android.content.SharedPreferences
 import android.os.CountDownTimer
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,7 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
     private val maxRounds = 3 // Maximum number of rounds
 
     // State variables using MutableStateFlow and MutableStateList for Compose UI
-    var score = mutableStateOf(0)
+    var score = mutableIntStateOf(0)
     var gameEnded = mutableStateOf(false)
     var showTiles = mutableStateOf(false)
     var canSubmit = mutableStateOf(false)
@@ -36,8 +37,8 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
 
     var username = mutableStateOf("")
 
-    val COUNTDOWN_INTERVAL = 1000L
-    var questionTimer: CountDownTimer? = null
+    val countdownInterval = 1000L
+    private var questionTimer: CountDownTimer? = null
     var answerTimer: CountDownTimer? = null
 
     init {
@@ -57,14 +58,13 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
     }
 
     fun startGame() {
-        score.value = 0 // Reset score
+        score.intValue = 0 // Reset score
         round = 1 // Reset round number
         numberOfTilesToHighlight = 4 // Reset number of tiles to highlight
         prepareGameRound() // Prepare for the first round
     }
 
     fun toggleTileSelection(index: Int) {
-        print("*** tile index: $index\n")
         userSelections[index] = !userSelections[index]
     }
 
@@ -83,7 +83,7 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
 
         viewModelScope.launch {
             /// answer timer
-            answerTimer = object : CountDownTimer(answerTime, COUNTDOWN_INTERVAL) {
+            answerTimer = object : CountDownTimer(answerTime, countdownInterval) {
                 override fun onTick(millisUntilFinished: Long) {
                     timerValue.value = (millisUntilFinished / 1000).toInt()
                 }
@@ -97,7 +97,7 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
                 }
             }
 
-            questionTimer = object : CountDownTimer(questionTime, COUNTDOWN_INTERVAL) {
+            questionTimer = object : CountDownTimer(questionTime, countdownInterval) {
                 override fun onTick(millisUntilFinished: Long) {
                     timerValue.value = (millisUntilFinished / 1000).toInt()
                 }
@@ -135,10 +135,7 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
 
 
         if (correctCount == numberOfTilesToHighlight) {
-            // If all correct, update score and prepare for the next round
             score.value += round * 10
-
-//            if (round % maxRounds == 0) numberOfTilesToHighlight++
 
             round++
 
@@ -147,9 +144,6 @@ class GameViewModel(private val prefs: SharedPreferences, private val gson: Gson
                 numberOfTilesToHighlight = 5
             }
 
-//            if (round <= maxRounds) {
-//                prepareGameRound()
-//            } else gameEnd()
             prepareGameRound()
         } else gameEnd()
     }
